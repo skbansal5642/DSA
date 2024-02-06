@@ -26,4 +26,32 @@ public class InsertionSort
 	        arr[index+1] = temp;
         }   
   }
+
+    void insertionSort1(int[] arr) 
+  {
+        int arrLength = arr.length;
+        // first loop to go to end of array
+        for (int currentIndex = 0; currentIndex < arrLength - 1; currentIndex++)
+        {
+            if (arr[currentIndex] > arr[currentIndex + 1])
+            {
+                int temp = arr[currentIndex];
+                arr[currentIndex] = arr[currentIndex + 1];
+                arr[currentIndex + 1] = temp;
+                
+                // Second loop will sort all elements after any swap
+                for (int index = currentIndex; index > 0; index--)
+                {
+                    if (arr[index] < arr[index - 1])
+                    {
+                        temp = arr[index];
+                        arr[index] = arr[index - 1];
+                        arr[index - 1] = temp;
+                    } else {
+                        break;
+                    }
+    	        }
+            }
+        }   
+  }
 }
