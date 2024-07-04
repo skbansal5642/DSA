@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.Map;
+import java.lang.Math;
 
 public class BinarySearchTree {
     public static void main(String args[]) {
@@ -16,9 +17,10 @@ public class BinarySearchTree {
         bt.insertNode(3);
         bt.insertNode(6);
         bt.insertNode(10);
-        bt.insertNode(14);
-        bt.insertNode(13);
         bt.insertNode(15);
+        bt.insertNode(13);
+        bt.insertNode(16);
+        bt.insertNode(14);
 
         bt.printTree();
 
@@ -41,6 +43,7 @@ class Node {
 class TreeOperations {
 
     Node root;
+    Node balancedRoot;
 
     public Node insert(Node root, int data) {
         if (root == null) {
@@ -56,7 +59,7 @@ class TreeOperations {
     }
 
     public void insertNode(int data) {
-        this.root = insert(this.root, data);
+        root = insert(root, data);
     }
 
     public void printTree() {
@@ -67,7 +70,7 @@ class TreeOperations {
         System.out.println("Pre-order:-");
         preorderTrav(this.root);
 
-        // deleteNode(8);
+        // deleteNode(15);
 
         System.out.println();
         System.out.println("Post-order:-");
@@ -122,6 +125,12 @@ class TreeOperations {
         } else {
             System.out.println("(" + searchNode + ") found on level (" + (level + 1) + ") in the tree.");
         }
+
+        balanceTree();
+
+        System.out.println();
+        System.out.println("Pre-order after balancing the tree:-");
+        preorderTrav(root);
     }
 
     public void inorderTrav(Node root) {
@@ -469,8 +478,88 @@ class TreeOperations {
         return searchRecursively(root.right, num, level);
     }
 
+    // Complexity -> O(h), h is height of tree (worst case)
     public void deleteNode(int num) {
-        // TODO: Need to Implement
+        if (root == null) return;
+        if (root.data == num && root.left == null && root.right == null) {
+            root = null;
+            return;
+        }
+        searchDeleteNode(root, num);
+    }
+
+    private Node searchDeleteNode(Node root, int num) {
+        if (root == null) return root;
+        if (num < root.data) {
+            root.left = searchDeleteNode(root.left, num);
+        } else if (num > root.data) {
+            root.right = searchDeleteNode(root.right, num);
+        } else {
+            return performDeletion(root);
+        }
+        return root;
+    }
+
+    private Node performDeletion(Node deleteNode) {
+        if (deleteNode.left == null && deleteNode.right == null) {
+            return null;
+        } else if (deleteNode.left == null && deleteNode.right != null) {
+            return deleteNode.right;
+        } else if (deleteNode.left != null && deleteNode.right == null) {
+            return deleteNode.left;
+        } else {
+            // get smallest of right
+            Node subst = null;
+            Node substParent = deleteNode.right;
+            while (true) {
+                if (substParent.left == null) {
+                    break;
+                } else if (substParent.left.left == null){
+                    subst = substParent.left;
+                    break;
+                } else {
+                    substParent = substParent.left;
+                }
+            }
+
+            if (subst != null) {
+                deleteNode.data = subst.data;
+                substParent.left = subst.right;
+                subst = null;
+            } else {
+                deleteNode.data = substParent.data;
+                deleteNode.right = null;
+                substParent = null;
+            }
+        }
+        return deleteNode;
+    }
+
+    // Time Complexity -> O(n) (as we need to traverse all element once)
+    // Space Complexity -> O(n) (as we need to store all nodes in an array) & (additional O(h) -> by recursion, which will be ignored)
+    public void balanceTree() {
+        // Get in-order of BST
+        ArrayList<Node> inOrderList = new ArrayList<>();
+        getInOrderList(root, inOrderList);
+
+        root = insertBalancedNode(inOrderList, 0, inOrderList.size() - 1);
+    }
+
+    public void getInOrderList(Node root, ArrayList<Node> inOrderList) {
+        if (root != null) {
+            getInOrderList(root.left, inOrderList);
+            inOrderList.add(root);
+            getInOrderList(root.right, inOrderList);
+        }
+    }
+
+    public Node insertBalancedNode(ArrayList<Node> inOrderList, int start, int endIdx) {
+        if (start > endIdx) return null;
+        int mid = (int)Math.floor((start + endIdx) / 2);
+        Node balancedNode = inOrderList.get(mid);
+        balancedNode.left = insertBalancedNode(inOrderList, start, mid - 1);
+        balancedNode.right = insertBalancedNode(inOrderList, mid + 1, endIdx);
+        return balancedNode;
     }
 }
 
